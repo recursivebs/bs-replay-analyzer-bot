@@ -12,7 +12,7 @@ module.exports = {
 
 		let data = [
 			{
-				"members": 946,
+				"members": 947,
 				"date": "10/21/2019"
 			}, {
 				"members": 1458,
