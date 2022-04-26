@@ -261,49 +261,56 @@ module.exports = {
 
 		await interaction.deferReply();
 
-		let playerId = helpers.extractPlayerId(interaction.options.getString("player_id"))
-		let leaderboardId = interaction.options.getString("leaderboard_id")
-		let fileURL = interaction.options.getString("file_url")
-		let report = interaction.options.getString("report")
+		try {
 
-		const replayData = await helpers.getReplayData({ playerId, leaderboardId, fileURL })
-		const scoringData = await helpers.getScoringDataFromReplayData(replayData)
-		const playerData = await helpers.getPlayerInfo(playerId)
+			let playerId = helpers.extractPlayerId(interaction.options.getString("player_id"))
+			let leaderboardId = interaction.options.getString("leaderboard_id")
+			let fileURL = interaction.options.getString("file_url")
+			let report = interaction.options.getString("report")
 
-		const params = { replayData, scoringData, playerData }
-		let images = []
-		if (report === "standard") {
+			const replayData = await helpers.getReplayData({ playerId, leaderboardId, fileURL })
+			const scoringData = await helpers.getScoringDataFromReplayData(replayData)
+			const playerData = await helpers.getPlayerInfo(playerId)
 
-			console.log("Building standard chart...")
-			let image = await buildAccGraphChart(params)
-			images.push(image)
+			const params = { replayData, scoringData, playerData }
+			let images = []
+			if (report === "standard") {
 
-		} else if (report === "split") {
+				console.log("Building standard chart...")
+				let image = await buildAccGraphChart(params)
+				images.push(image)
 
-			console.log("Building split chart...")
-			let hand = "left"
-			const leftParams = {...params, hand }
-			const leftImage = await buildSplitAccGraphChart(leftParams)
-			images.push(leftImage)
+			} else if (report === "split") {
 
-			hand = "right"
-			const rightParams = {...params, hand }
-			const rightImage = await buildSplitAccGraphChart(rightParams)
-			images.push(rightImage)
+				console.log("Building split chart...")
+				let hand = "left"
+				const leftParams = {...params, hand }
+				const leftImage = await buildSplitAccGraphChart(leftParams)
+				images.push(leftImage)
 
-		} else if (report === "hitscore") {
-			
-			// TODO
+				hand = "right"
+				const rightParams = {...params, hand }
+				const rightImage = await buildSplitAccGraphChart(rightParams)
+				images.push(rightImage)
 
+			} else if (report === "hitscore") {
+				
+				// TODO
+
+			}
+
+			let attachments = []
+			console.log(images.length)
+			for (const image of images) {
+				attachments.push(new MessageAttachment(image))
+			}
+
+			await interaction.editReply({files: attachments});
+
+		} catch (e) {
+            interaction.editReply(`An error occurred! Please check the command and try again.`);
 		}
 
-		let attachments = []
-		console.log(images.length)
-		for (const image of images) {
-			attachments.push(new MessageAttachment(image))
-		}
-
-		await interaction.editReply({files: attachments});
 
 	},
 };
