@@ -5,6 +5,26 @@ const chartUtils = require('../misc/chart-utils')
 
 const movingAverageFactor = 10
 
+const getReplayData = async (params) => {
+    let replayData = {}
+    try {
+        let replayEndpoint = ""
+        if (params.fileURL) {
+            // Prefer the file url endpoint, if fileURL is set
+            replayEndpoint = `https://sspreviewdecode.azurewebsites.net/?link=${params.fileURL}`
+        } else {
+            replayEndpoint = `https://sspreviewdecode.azurewebsites.net/?playerID=${params.playerId}&songID=${params.leaderboardId}`
+        }
+        const replayResponse = await fetch(replayEndpoint)
+        const replayDataStr = await replayResponse.json()
+        replayData = JSON.parse(replayDataStr)
+    } catch (e) {
+        console.error(e)
+    } finally {
+        return replayData
+    }
+}
+
 const getBeatSaverMapDataByHash = async (hash) => {
     let data = {}
     try {
@@ -78,7 +98,6 @@ const extractVersionData = (mapData, mapHash) => {
 const extractDiffData = (versionData, difficulty) => {
     let foundDiff = {}
     for (const diff of versionData.diffs) {
-        console.log(diff.difficulty + " " + difficulty)
         if (diff.difficulty.toLowerCase() === difficulty.toLowerCase()) {
             foundDiff = diff
             break;
@@ -221,10 +240,19 @@ const buildScatterPlotData = (noteTimes, noteScores) => {
 }
 
 
-const buildFullComboAccDataSet = (scoringData, accProfile) => {
+const buildFullComboAccDataSet = (scoringData, accProfile, ignoreSplit) => {
 
     let rollingAcc = []
-    let currentAvg = 100
+
+    let datasets = []
+    datasets.push({
+        type: 'line',
+        label: `FC Acc`,
+        data: rollingAcc,
+        borderColor: 'rgb(208, 148, 234, 125)',
+        borderWidth: 2,
+        pointRadius: 0,
+    })
 
     let bothHandsData = buildScatterPlotData(scoringData.noteTimes, scoringData.scores)
     for (let index = 0; index < bothHandsData.length; index++) {
@@ -237,8 +265,14 @@ const buildFullComboAccDataSet = (scoringData, accProfile) => {
         })
     }
 
-    let leftHandData = buildScatterPlotData(scoringData.handData.left.noteTimes, scoringData.handData.left.scores)
+    if (ignoreSplit) {
+        return datasets
+    }
+
     let leftRollingAcc = []
+    let rightRollingAcc = []
+
+    let leftHandData = buildScatterPlotData(scoringData.handData.left.noteTimes, scoringData.handData.left.scores)
     for (let index = 0; index < leftHandData.length; index++) {
         const arr = leftHandData.slice(0, index).map(x => x.y)
         const sum = arr.reduce((x, y) => x + y, 0)
@@ -250,7 +284,6 @@ const buildFullComboAccDataSet = (scoringData, accProfile) => {
     }
 
     let rightHandData = buildScatterPlotData(scoringData.handData.right.noteTimes, scoringData.handData.right.scores)
-    let rightRollingAcc = []
     for (let index = 0; index < rightHandData.length; index++) {
         const arr = rightHandData.slice(0, index).map(x => x.y)
         const sum = arr.reduce((x, y) => x + y, 0)
@@ -260,17 +293,6 @@ const buildFullComboAccDataSet = (scoringData, accProfile) => {
             y: avg
         })
     }
-
-
-    let datasets = []
-    datasets.push({
-        type: 'line',
-        label: `FC Acc`,
-        data: rollingAcc,
-        borderColor: 'rgb(208, 148, 234, 125)',
-        borderWidth: 2,
-        pointRadius: 0,
-    })
 
     datasets.push({
         type: 'line',
@@ -318,12 +340,15 @@ const buildScatterDataSets = (chartData, accProfile) => {
 
     let datasets = []
 
+    const bubbleRadius = 4
+
     datasets.push({
         type: 'scatter',
         label: `Perfect (x${perfectScores.length}, ${helpers.calculatePercentage(perfectScores.length, chartData.length)}%)`,
         data: perfectScores,
         borderColor: chartUtils.COLOR_BLUE,
-        backgroundColor: chartUtils.transparentize(chartUtils.COLOR_BLUE)
+        backgroundColor: chartUtils.COLOR_BLUE,
+        radius: bubbleRadius,
     })
 
     datasets.push({
@@ -331,7 +356,8 @@ const buildScatterDataSets = (chartData, accProfile) => {
         label: `Good (x${goodScores.length}, ${helpers.calculatePercentage(goodScores.length, chartData.length)}%)`,
         data: goodScores,
         borderColor: chartUtils.COLOR_GREEN,
-        backgroundColor: chartUtils.transparentize(chartUtils.COLOR_GREEN)
+        backgroundColor: chartUtils.COLOR_GREEN,
+        radius: bubbleRadius,
     })
 
     datasets.push({
@@ -339,7 +365,8 @@ const buildScatterDataSets = (chartData, accProfile) => {
         label: `Normal (x${normalScores.length}, ${helpers.calculatePercentage(normalScores.length, chartData.length)}%)`,
         data: normalScores,
         borderColor: chartUtils.COLOR_PURPLE,
-        backgroundColor: chartUtils.transparentize(chartUtils.COLOR_PURPLE)
+        backgroundColor: chartUtils.COLOR_PURPLE,
+        radius: bubbleRadius,
     })
 
     datasets.push({
@@ -347,7 +374,8 @@ const buildScatterDataSets = (chartData, accProfile) => {
         label: `Ok (x${okScores.length}, ${helpers.calculatePercentage(okScores.length, chartData.length)}%)`,
         data: okScores,
         borderColor: chartUtils.COLOR_YELLOW,
-        backgroundColor: chartUtils.transparentize(chartUtils.COLOR_YELLOW)
+        backgroundColor: chartUtils.COLOR_YELLOW,
+        radius: bubbleRadius,
     })
 
     datasets.push({
@@ -355,7 +383,8 @@ const buildScatterDataSets = (chartData, accProfile) => {
         label: `Bad (x${badScores.length}, ${helpers.calculatePercentage(badScores.length, chartData.length)}%)`,
         data: badScores,
         borderColor: chartUtils.COLOR_RED,
-        backgroundColor: chartUtils.transparentize(chartUtils.COLOR_RED)
+        backgroundColor: chartUtils.COLOR_RED,
+        radius: bubbleRadius,
     })
 
     return datasets
@@ -399,3 +428,4 @@ exports.buildScatterDataSets = buildScatterDataSets
 exports.extractPlayerId = extractPlayerId
 exports.getPlayerInfo = getPlayerInfo
 exports.buildFullComboAccDataSet = buildFullComboAccDataSet
+exports.getReplayData = getReplayData

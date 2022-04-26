@@ -46,6 +46,33 @@ const getChartSubtitle = (scoringData, playerData) => {
 
 exports.getChartSubtitle = getChartSubtitle
 
+const getHandSpecificChartSubtitle = (scoringData, playerData, hand) => {
+
+    if (hand === "left") {
+
+        const playerName = playerData.name
+        const leftScores = scoringData.handData.left.scores
+        const leftSum = leftScores.reduce((a, b) => a + b, 0)
+        const leftAvg = (leftSum / leftScores.length) || 0
+        const leftAcc = helpers.calculatePercentage(leftAvg, 115)
+
+        return `Played by ${playerName} | L Acc: ${leftAcc}%`
+
+    } else {
+
+        const playerName = playerData.name
+        const rightScores = scoringData.handData.right.scores
+        const rightSum = rightScores.reduce((a, b) => a + b, 0)
+        const rightAvg = (rightSum / rightScores.length) || 0
+        const rightAcc = helpers.calculatePercentage(rightAvg, 115)
+
+        return `Played by ${playerName} | R Acc: ${rightAcc}%`
+
+    }
+}
+
+exports.getHandSpecificChartSubtitle = getHandSpecificChartSubtitle
+
 
 exports.accProfiles = {
     standard: {
