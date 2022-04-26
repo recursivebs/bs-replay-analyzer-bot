@@ -27,7 +27,8 @@ const getChartTitle = (mapData) => {
 exports.getChartTitle = getChartTitle
 
 
-const getChartSubtitle = (scoringData) => {
+const getChartSubtitle = (scoringData, playerData) => {
+    const playerName = playerData.name
     const percentage = scoringData.totalPercentage
 
     const leftScores = scoringData.handData.left.scores
@@ -40,7 +41,7 @@ const getChartSubtitle = (scoringData) => {
     const rightAvg = (rightSum / rightScores.length) || 0
     const rightAcc = helpers.calculatePercentage(rightAvg, 115)
 
-    return `${percentage}% | L Acc: ${leftAcc}% | R Acc: ${rightAcc}%`
+    return `Played by ${playerName} | ${percentage}% | L Acc: ${leftAcc}% | R Acc: ${rightAcc}%`
 }
 
 exports.getChartSubtitle = getChartSubtitle

@@ -32,6 +32,7 @@ module.exports = {
 		const replayDataStr = await replayResponse.json()
 		const replayData = JSON.parse(replayDataStr)
 		const scoringData = await helpers.getScoringDataFromReplayData(replayData)
+		const playerData = await helpers.getPlayerInfo(playerID)
 
 		const width = 1280
 		const height = 900
@@ -56,7 +57,7 @@ module.exports = {
 
 		const chartFont = "Consolas"
 		const chartTitle = chartUtils.getChartTitle(scoringData.mapData)
-		const chartSubtitle = chartUtils.getChartSubtitle(scoringData)
+		const chartSubtitle = chartUtils.getChartSubtitle(scoringData, playerData)
 
 		const configuration = {
 			data: data,

@@ -382,6 +382,11 @@ const extractPlayerId = (str) => {
     }
 }
 
+const getPlayerInfo = async (playerID) => {
+    const response = await fetch(`https://scoresaber.com/api/player/${playerID}/full`);
+    const playerData = await response.json();
+    return playerData;
+}
 
 exports.getBeatSaverMapDataByHash = getBeatSaverMapDataByHash
 exports.getBeatSaverDifficulty = getBeatSaverDifficulty
@@ -392,4 +397,5 @@ exports.calculatePercentage = calculatePercentage
 exports.buildScatterPlotData = buildScatterPlotData
 exports.buildScatterDataSets = buildScatterDataSets
 exports.extractPlayerId = extractPlayerId
+exports.getPlayerInfo = getPlayerInfo
 exports.buildFullComboAccDataSet = buildFullComboAccDataSet
