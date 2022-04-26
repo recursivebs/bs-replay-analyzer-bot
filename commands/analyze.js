@@ -308,6 +308,7 @@ module.exports = {
 			await interaction.editReply({files: attachments});
 
 		} catch (e) {
+			console.error(e)
             interaction.editReply(`An error occurred! Please check the command and try again.`);
 		}
 
