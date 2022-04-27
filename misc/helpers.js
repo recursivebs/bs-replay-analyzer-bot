@@ -3,7 +3,32 @@ const helpers = require('../misc/helpers')
 const movingAverages = require('moving-averages')
 const chartUtils = require('../misc/chart-utils')
 
-const movingAverageFactor = 10
+const getMovingAverageFactor = (replayData) => {
+    if (replayData && replayData.scores) {
+        const notes = replayData.scores.length
+        if (notes < 100) {
+            return 3
+        }
+        if (notes < 300) {
+            return 4
+        }
+        if (notes < 750) {
+            return 5
+        }
+        if (notes < 1000) {
+            return 6
+        }
+        if (notes < 1400) {
+            return 7
+        }
+        if (notes < 1800) {
+            return 8
+        }
+        return 10
+    } else {
+        return 10
+    }
+}
 
 const getReplayData = async (params) => {
     let replayData = {}
@@ -169,6 +194,7 @@ const extractHandData = (replayData) => {
         index = index + 1
     }
 
+    const movingAverageFactor = getMovingAverageFactor(replayData)
     leftHandAveragedScores = movingAverages.ma(leftHandScores, movingAverageFactor)
     rightHandAveragedScores = movingAverages.ma(rightHandScores, movingAverageFactor)
 
@@ -201,6 +227,8 @@ const getScoringDataFromReplayData = async (replayData) => {
     const handData = extractHandData(replayData)
     const version = extractVersionData(mapData, mapHash)
     const diff = extractDiffData(version, beatSaverDifficulty)
+
+    const movingAverageFactor = getMovingAverageFactor(replayData)
 
     return {
         mapData: {
@@ -333,7 +361,7 @@ const buildScatterDataSets = (chartData, accProfile) => {
             normalScores.push(d)
         } else if (d.y < accProfile.normal && d.y >= accProfile.ok) {
             okScores.push(d)
-        } else {
+        } else if (d.y < accProfile.ok && d.y >= 10) {
             badScores.push(d)
         }
     }
