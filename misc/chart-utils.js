@@ -21,7 +21,7 @@ const getChartTitle = (mapData) => {
     if (mapData.ranked) {
         return `${mapData.songAuthorName} - ${mapData.mapName} | ${mapData.difficulty} | ⭐${mapData.stars} | 🔑${mapData.mapKey}`
     } else {
-        return `${mapData.songAuthorName} - ${mapData.mapName} | ${mapData.difficulty} | ${mapData.mapKey}`
+        return `${mapData.songAuthorName} - ${mapData.mapName} | ${mapData.difficulty} | 🔑${mapData.mapKey}`
     }
 }
 exports.getChartTitle = getChartTitle
