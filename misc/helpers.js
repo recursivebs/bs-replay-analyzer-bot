@@ -458,7 +458,7 @@ const getScoresaberLeaderboardData = async (leaderboardId) => {
 const extractPlayerIds = (playerList) => {
     let playerIdList = []
     for (const playerId of playerList.split(",")) {
-        playerIdList.push(playerId)
+        playerIdList.push(playerId.trim())
     }
     return playerIdList
 }
