@@ -1,7 +1,8 @@
 const fetch = require('node-fetch');
 const helpers = require('../misc/helpers')
 const movingAverages = require('moving-averages')
-const chartUtils = require('../misc/chart-utils')
+const chartUtils = require('../misc/chart-utils');
+const { data } = require('../commands/analyze');
 
 const getMovingAverageFactor = (replayData) => {
     if (replayData && replayData.scores) {
@@ -457,11 +458,29 @@ const getScoresaberLeaderboardData = async (leaderboardId) => {
 const extractPlayerIds = (playerList) => {
     let playerIdList = []
     for (const playerId of playerList.split(",")) {
-        playerIdList.push(+playerId)
+        playerIdList.push(playerId)
     }
     return playerIdList
 }
+exports.extractPlayerIds = extractPlayerIds
 
+
+const getTop10PlayerIds = async (leaderboardId) => {
+
+    let playerIds = []
+    try {
+        const url = `https://scoresaber.com/api/leaderboard/by-id/${leaderboardId}/scores`
+        const response = await fetch(url)
+        const data = await response.json()
+        playerIds = data["scores"].map(x => x.leaderboardPlayerInfo.id).slice(0, 10)
+    } catch (e) {
+        console.error(e)
+    } finally {
+        return playerIds
+    }
+
+}
+exports.getTop10PlayerIds = getTop10PlayerIds
 
 exports.getBeatSaverMapDataByHash = getBeatSaverMapDataByHash
 exports.getBeatSaverDifficulty = getBeatSaverDifficulty
