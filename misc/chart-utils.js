@@ -270,6 +270,9 @@ exports.accProfiles = {
 }
 
 const getMultiLineRankColor = (rank) => {
+    if (rank > 10) {
+        return 'rgba(0, 0, 0, 0.5)'
+    }
     const colors = [
         'rgb(255, 193, 76)',
         'rgb(145, 181, 196)',

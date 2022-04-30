@@ -42,7 +42,10 @@ const buildHitscoreChart = async (params) => {
 
 	const chartFont = "Consolas"
 	const chartTitle = chartUtils.getChartTitle(params.scoringData.mapData, params.scoresaberLeaderboardData)
-	const chartSubtitle = chartUtils.getHandSpecificChartSubtitle(params.scoringData, params.playerData, params.hand)
+	let chartSubtitle = chartUtils.getChartSubtitle(params.scoringData, params.playerData)
+	if (params.hand) {
+		chartSubtitle = chartUtils.getHandSpecificChartSubtitle(params.scoringData, params.playerData, params.hand)
+	}
 
 	const config = {
 		type: 'bar',

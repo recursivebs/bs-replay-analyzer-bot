@@ -54,10 +54,10 @@ const buildHitscoreChart = async (params) => {
 	allData = allData.filter(data => !data.error)
 
 	const allHitscoreDatasets = allData.map(data => {
-		const hitscoreData = chartUtils.buildMultiHitscoreData(data)
+		const hitscoreData = chartUtils.buildHitscoreData({...data, hand: params.hand })
 		const dataset = {
 			label: data.playerData.name,
-			data: chartUtils.buildMultiHitscoreChartData(hitscoreData, data.replayData.scores.length),
+			data: chartUtils.buildHitscoreChartData(hitscoreData, data.replayData.scores.length),
 			fill: false,
 			borderColor: chartUtils.getMultiLineRankColor(data.rank),
 			backgroundColor: chartUtils.getMultiLineRankColor(data.rank),
@@ -73,11 +73,19 @@ const buildHitscoreChart = async (params) => {
 	})
 
 	const chartData = {
-		labels: chartUtils.getHitscoreMultiBarGraphLabels({}),
+		labels: chartUtils.getHitscoreBarGraphLabels({}),
 		datasets: allHitscoreDatasets,
 	}
 
 	const chartTitle = chartUtils.getChartTitle(allData[0].scoringData.mapData, params.scoresaberLeaderboardData)
+	let chartSubtitle = ""
+	if (params.hand) {
+		if (params.hand === "left") {
+			chartSubtitle = "Left Hand"
+		} else if (params.hand === "right") {
+			chartSubtitle = "Right Hand"
+		}
+	}
 	const chartFont = "Consolas"
 
 	const config = {
@@ -92,6 +100,12 @@ const buildHitscoreChart = async (params) => {
 					grid: {
 						lineWidth: 2,
 						color: 'rgba(0,0,0,0.3)',
+					},
+					ticks: {
+						font: {
+							size: 16
+						},
+						color: 'rgb(255,0,0)',
 					}
 				},
 				y: {
@@ -120,6 +134,14 @@ const buildHitscoreChart = async (params) => {
 						size: 32
 					}
 				},
+				subtitle: {
+					display: true,
+					text: chartSubtitle,
+					font: {
+						family: chartFont,
+						size: 24
+					}
+				}
 			}
 		},
 	};
@@ -139,7 +161,7 @@ module.exports = {
 				.setDescription("Which report to run?")
 				.setRequired(true)
 				.addChoice('Hitscore', "hitscore")
-				.addChoice('Hitscore 2', "hitscore2")
+				.addChoice('Hitscore Split', "hitscore-split")
 		)
 		.addStringOption(option =>
 			option.setName("method")
@@ -194,6 +216,17 @@ module.exports = {
 				console.log("Building hitscore chart...")
 				let image = await buildHitscoreChart(params)
 				images.push(image)
+			} else if (report === "hitscore-split") {
+				console.log("Building hitscore split chart...")
+				let hand = "left"
+				const leftParams = {...params, hand }
+				const leftImage = await buildHitscoreChart(leftParams)
+				images.push(leftImage)
+
+				hand = "right"
+				const rightParams = {...params, hand }
+				const rightImage = await buildHitscoreChart(rightParams)
+				images.push(rightImage)
 			}
 
 			let attachments = []
