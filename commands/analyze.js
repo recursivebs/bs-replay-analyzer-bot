@@ -12,7 +12,7 @@ const buildHitscoreChart = async (params) => {
 	const width = 1280
 	const height = 900
 
-	const backgroundColour = 'white'
+	const backgroundColour = '#2b2e33'
 
 	const canvas = new ChartJSNodeCanvas({
 		width, height, backgroundColour
@@ -40,7 +40,7 @@ const buildHitscoreChart = async (params) => {
 		}]
 	}
 
-	const chartFont = "Consolas"
+	const chartFont = "Rubik"
 	const chartTitle = chartUtils.getChartTitle(params.scoringData.mapData, params.scoresaberLeaderboardData)
 	let chartSubtitle = chartUtils.getChartSubtitle(params.scoringData, params.playerData)
 	if (params.hand) {
@@ -55,13 +55,29 @@ const buildHitscoreChart = async (params) => {
 				padding: 20
 			},
 			scales: {
+				x: {
+					grid: {
+						lineWidth: 1.6,
+						color: 'rgba(255,255,255,0.05)'
+					},
+					ticks: {
+						font: {
+							size: 24
+						},
+						color: 'rgba(255,255,255,0.7)'
+					}
+				},
 				y: {
-					beginAtZero: true
+					grid: {
+						lineWidth: 1.6,
+						color: 'rgba(255,255,255,0.05)'
+					},
 				}
 			},
 			plugins: {
 				legend: {
 					labels: {
+						color: 'rgba(255,255,255,0.3)',
 						font: {
 							family: chartFont,
 							size: 16
@@ -72,6 +88,7 @@ const buildHitscoreChart = async (params) => {
 				title: {
 					display: true,
 					text: chartTitle,
+					color: 'rgba(255,255,255,0.7)',
 					font: {
 						family: chartFont,
 						size: 32
@@ -80,6 +97,7 @@ const buildHitscoreChart = async (params) => {
 				subtitle: {
 					display: true,
 					text: chartSubtitle,
+					color: 'rgba(255,255,255,0.7)',
 					font: {
 						family: chartFont,
 						size: 24
@@ -100,7 +118,7 @@ const buildAccGraphChart = async (params) => {
 	const width = 1280
 	const height = 900
 
-	const backgroundColour = 'white'
+	const backgroundColour = '#2b2e33'
 
 	const canvas = new ChartJSNodeCanvas({
 		width, height, backgroundColour
@@ -117,7 +135,7 @@ const buildAccGraphChart = async (params) => {
 		datasets: datasets
 	}
 
-	const chartFont = "Consolas"
+	const chartFont = "Rubik"
 	const chartTitle = chartUtils.getChartTitle(params.scoringData.mapData, params.scoresaberLeaderboardData)
 	const chartSubtitle = chartUtils.getChartSubtitle(params.scoringData, params.playerData)
 
@@ -129,9 +147,14 @@ const buildAccGraphChart = async (params) => {
 			},
 			scales: {
 				x: {
+					grid: {
+						lineWidth: 1.6,
+						color: 'rgba(255,255,255,0.12)'
+					},
 					title: {
 						display: true,
 						text: 'Time (s)',
+						color: 'rgba(255,255,255,0.7)',
 						font: {
 							family: chartFont
 						}
@@ -140,22 +163,29 @@ const buildAccGraphChart = async (params) => {
 					position: 'bottom',
 					ticks: {
 						font: {
-							family: chartFont
-						}
+							size: 18
+						},
+						color: 'rgba(255,255,255,0.7)'
 					}
 				},
 				y: {
+					grid: {
+						lineWidth: 1.6,
+						color: 'rgba(255,255,255,0.12)'
+					},
 					title: {
 						display: true,
 						text: 'Accuracy',
+						color: 'rgba(255,255,255,0.7)',
 						font: {
 							family: chartFont
 						}
 					},
 					ticks: {
 						font: {
-							family: chartFont
-						}
+							size: 18
+						},
+						color: 'rgba(255,255,255,0.7)'
 					}
 				}
 			},
@@ -163,6 +193,7 @@ const buildAccGraphChart = async (params) => {
 				legend: {
 					labels: {
 						font: {
+							color: 'rgba(255,255,255,0.3)',
 							family: chartFont,
 							size: 16
 						},
@@ -172,6 +203,7 @@ const buildAccGraphChart = async (params) => {
 				title: {
 					display: true,
 					text: chartTitle,
+					color: 'rgba(255,255,255,0.7)',
 					font: {
 						family: chartFont,
 						size: 32
@@ -180,6 +212,7 @@ const buildAccGraphChart = async (params) => {
 				subtitle: {
 					display: true,
 					text: chartSubtitle,
+					color: 'rgba(255,255,255,0.7)',
 					font: {
 						family: chartFont,
 						size: 24
@@ -200,7 +233,7 @@ const buildSplitAccGraphChart = async (params) => {
 	const width = 1280
 	const height = 900
 
-	const backgroundColour = 'white'
+	const backgroundColour = '#2b2e33'
 
 	const canvas = new ChartJSNodeCanvas({
 		width, height, backgroundColour
@@ -240,7 +273,7 @@ const buildSplitAccGraphChart = async (params) => {
 		datasets: datasets
 	}
 
-	const chartFont = "Consolas"
+	const chartFont = "Rubik"
 	const chartTitle = chartUtils.getChartTitle(params.scoringData.mapData, params.scoresaberLeaderboardData)
 	let chartSubtitle = chartUtils.getHandSpecificChartSubtitle(params.scoringData, params.playerData, params.hand)
 
@@ -252,9 +285,14 @@ const buildSplitAccGraphChart = async (params) => {
 			},
 			scales: {
 				x: {
+					grid: {
+						lineWidth: 1.6,
+						color: 'rgba(255,255,255,0.12)'
+					},
 					title: {
 						display: true,
 						text: 'Time (s)',
+						color: 'rgba(255,255,255,0.7)',
 						font: {
 							family: chartFont
 						}
@@ -263,28 +301,36 @@ const buildSplitAccGraphChart = async (params) => {
 					position: 'bottom',
 					ticks: {
 						font: {
-							family: chartFont
-						}
+							size: 18
+						},
+						color: 'rgba(255,255,255,0.7)'
 					}
 				},
 				y: {
+					grid: {
+						lineWidth: 1.6,
+						color: 'rgba(255,255,255,0.12)'
+					},
 					title: {
 						display: true,
 						text: 'Accuracy',
+						color: 'rgba(255,255,255,0.7)',
 						font: {
 							family: chartFont
 						}
 					},
 					ticks: {
 						font: {
-							family: chartFont
-						}
+							size: 18
+						},
+						color: 'rgba(255,255,255,0.7)'
 					}
 				}
 			},
 			plugins: {
 				legend: {
 					labels: {
+						color: 'rgba(255,255,255,0.3)',
 						font: {
 							family: chartFont,
 							size: 16
@@ -295,6 +341,7 @@ const buildSplitAccGraphChart = async (params) => {
 				title: {
 					display: true,
 					text: chartTitle,
+					color: 'rgba(255,255,255,0.7)',
 					font: {
 						family: chartFont,
 						size: 32
@@ -303,6 +350,7 @@ const buildSplitAccGraphChart = async (params) => {
 				subtitle: {
 					display: true,
 					text: chartSubtitle,
+					color: 'rgba(255,255,255,0.7)',
 					font: {
 						family: chartFont,
 						size: 24

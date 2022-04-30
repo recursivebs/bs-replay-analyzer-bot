@@ -11,7 +11,7 @@ const buildHitscoreChart = async (params) => {
 	const width = 1280
 	const height = 900
 
-	const backgroundColour = 'white'
+	const backgroundColour = '#2b2e33'
 
 	const canvas = new ChartJSNodeCanvas({
 		width, height, backgroundColour
@@ -86,7 +86,7 @@ const buildHitscoreChart = async (params) => {
 			chartSubtitle = "Right Hand"
 		}
 	}
-	const chartFont = "Consolas"
+	const chartFont = "Rubik"
 
 	const config = {
 		type: 'line',
@@ -98,20 +98,20 @@ const buildHitscoreChart = async (params) => {
 			scales: {
 				x: {
 					grid: {
-						lineWidth: 2,
-						color: 'rgba(0,0,0,0.3)',
+						lineWidth: 1.6,
+						color: 'rgba(255,255,255,0.28)'
 					},
 					ticks: {
 						font: {
-							size: 16
+							size: 24
 						},
-						color: 'rgb(255,0,0)',
+						color: 'rgba(255,255,255,0.75)'
 					}
 				},
 				y: {
 					grid: {
-						lineWidth: 2,
-						color: 'rgba(0,0,0,0.3)',
+						lineWidth: 1.6,
+						color: 'rgba(255,255,255,0.28)'
 					},
 					beginAtZero: true
 				}
@@ -119,9 +119,10 @@ const buildHitscoreChart = async (params) => {
 			plugins: {
 				legend: {
 					labels: {
+						color: 'rgba(255,255,255,0.3)',
 						font: {
 							family: chartFont,
-							size: 16
+							size: 24
 						},
 					},
 					position: 'top',
@@ -129,6 +130,7 @@ const buildHitscoreChart = async (params) => {
 				title: {
 					display: true,
 					text: chartTitle,
+					color: 'rgba(255,255,255,0.7)',
 					font: {
 						family: chartFont,
 						size: 32
@@ -137,6 +139,7 @@ const buildHitscoreChart = async (params) => {
 				subtitle: {
 					display: true,
 					text: chartSubtitle,
+					color: 'rgba(255,255,255,0.7)',
 					font: {
 						family: chartFont,
 						size: 24

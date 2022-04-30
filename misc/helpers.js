@@ -36,9 +36,11 @@ const getReplayData = async (params) => {
     try {
         let replayEndpoint = ""
         if (params.fileURL) {
+            console.log("Using file URL")
             // Prefer the file url endpoint, if fileURL is set
             replayEndpoint = `https://sspreviewdecode.azurewebsites.net/?link=${params.fileURL}`
         } else {
+            console.log("Using Scoresaber Replay")
             replayEndpoint = `https://sspreviewdecode.azurewebsites.net/?playerID=${params.playerId}&songID=${params.leaderboardId}`
         }
         const replayResponse = await fetch(replayEndpoint)
@@ -219,7 +221,6 @@ const extractHandData = (replayData) => {
 
 
 const getScoringDataFromReplayData = async (replayData) => {
-
     const totalScore = replayData.info.totalScore;
     const mapHash = getMapHashFromReplayData(replayData)
     const mapData = await getBeatSaverMapDataByHash(mapHash)
