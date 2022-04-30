@@ -68,6 +68,7 @@ const getMapHashFromReplayData = (replayData) => {
     let hash = ""
     if (replayData.info && replayData.info.hash) {
         hash = replayData.info.hash.replaceAll("custom_level_", "").toLowerCase()
+        hash = hash.split("_")[0]
     }
     return hash
 }
