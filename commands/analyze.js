@@ -6,6 +6,92 @@ const helpers = require('../misc/helpers')
 const chartUtils = require('../misc/chart-utils')
 
 
+
+const buildHitscoreChart = async (params) => {
+
+	const width = 1280
+	const height = 900
+
+	const backgroundColour = 'white'
+
+	const canvas = new ChartJSNodeCanvas({
+		width, height, backgroundColour
+	})
+
+	const hitscoreData = chartUtils.buildHitscoreData(params)
+
+	let totalNotes = params.replayData.scores.length
+	if (params.hand) {
+		if (params.hand === "left") {
+			totalNotes = params.scoringData.handData.left.scores.length
+		} else {
+			totalNotes = params.scoringData.handData.right.scores.length
+		}
+	}
+
+	const chartData = {
+		labels: chartUtils.getHitscoreBarGraphLabels(hitscoreData),
+		datasets: [{
+			label: "Hitscores",
+			data: chartUtils.buildHitscoreChartData(hitscoreData, totalNotes),
+			backgroundColor: chartUtils.hitscoreBarGraphBackgroundColors,
+			borderColor: chartUtils.hitscoreBarGraphBorderColors,
+			borderWidth: 2
+		}]
+	}
+
+	const chartFont = "Consolas"
+	const chartTitle = chartUtils.getChartTitle(params.scoringData.mapData, params.scoresaberLeaderboardData)
+	const chartSubtitle = chartUtils.getHandSpecificChartSubtitle(params.scoringData, params.playerData, params.hand)
+
+	const config = {
+		type: 'bar',
+		data: chartData,
+		options: {
+			layout: {
+				padding: 20
+			},
+			scales: {
+				y: {
+					beginAtZero: true
+				}
+			},
+			plugins: {
+				legend: {
+					labels: {
+						font: {
+							family: chartFont,
+							size: 16
+						},
+					},
+					position: 'top',
+				},
+				title: {
+					display: true,
+					text: chartTitle,
+					font: {
+						family: chartFont,
+						size: 32
+					}
+				},
+				subtitle: {
+					display: true,
+					text: chartSubtitle,
+					font: {
+						family: chartFont,
+						size: 24
+					}
+				}
+			}
+		}
+	}
+
+	const image = await canvas.renderToBuffer(config)
+	return image
+
+}
+
+
 const buildAccGraphChart = async (params) => {
 
 	const width = 1280
@@ -240,6 +326,7 @@ module.exports = {
 				.addChoice('Standard', "standard")
 				.addChoice('Split', "split")
 				.addChoice('Hitscore', "hitscore")
+				.addChoice('Hitscore Split', "hitscore-split")
 		)
 		.addStringOption(option =>
 			option.setName("player_id")
@@ -295,8 +382,23 @@ module.exports = {
 				images.push(rightImage)
 
 			} else if (report === "hitscore") {
-				
-				// TODO
+
+				console.log("Building hitscore chart...")
+				let image = await buildHitscoreChart(params)
+				images.push(image)
+
+			} else if (report === "hitscore-split") {
+
+				console.log("Building split hitscore chart...")
+				let hand = "left"
+				const leftParams = {...params, hand }
+				const leftImage = await buildHitscoreChart(leftParams)
+				images.push(leftImage)
+
+				hand = "right"
+				const rightParams = {...params, hand }
+				const rightImage = await buildHitscoreChart(rightParams)
+				images.push(rightImage)
 
 			}
 
