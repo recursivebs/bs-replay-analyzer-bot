@@ -73,7 +73,7 @@ const buildHitscoreChart = async (params) => {
 	})
 
 	const chartData = {
-		labels: chartUtils.getHitscoreBarGraphLabels({}),
+		labels: chartUtils.getHitscoreMultiBarGraphLabels({}),
 		datasets: allHitscoreDatasets,
 	}
 

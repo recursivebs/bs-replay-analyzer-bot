@@ -214,7 +214,7 @@ exports.getHitscoreBarGraphLabels = (data) => {
 }
 
 
-exports.getHitscoreBarGraphLabels = (data) => {
+exports.getHitscoreMultiBarGraphLabels = (data) => {
     return [
         "<109",
         "110",
