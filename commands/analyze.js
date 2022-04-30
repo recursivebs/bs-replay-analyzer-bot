@@ -29,7 +29,7 @@ const buildAccGraphChart = async (params) => {
 	}
 
 	const chartFont = "Consolas"
-	const chartTitle = chartUtils.getChartTitle(params.scoringData.mapData)
+	const chartTitle = chartUtils.getChartTitle(params.scoringData.mapData, params.scoresaberLeaderboardData)
 	const chartSubtitle = chartUtils.getChartSubtitle(params.scoringData, params.playerData)
 
 	const configuration = {
@@ -152,7 +152,7 @@ const buildSplitAccGraphChart = async (params) => {
 	}
 
 	const chartFont = "Consolas"
-	const chartTitle = chartUtils.getChartTitle(params.scoringData.mapData)
+	const chartTitle = chartUtils.getChartTitle(params.scoringData.mapData, params.scoresaberLeaderboardData)
 	let chartSubtitle = chartUtils.getHandSpecificChartSubtitle(params.scoringData, params.playerData, params.hand)
 
 	const configuration = {
@@ -269,10 +269,11 @@ module.exports = {
 			let report = interaction.options.getString("report")
 
 			const replayData = await helpers.getReplayData({ playerId, leaderboardId, fileURL })
+			const scoresaberLeaderboardData = await helpers.getScoresaberLeaderboardData(leaderboardId)
 			const scoringData = await helpers.getScoringDataFromReplayData(replayData)
 			const playerData = await helpers.getPlayerInfo(playerId)
 
-			const params = { replayData, scoringData, playerData }
+			const params = { replayData, scoringData, playerData, scoresaberLeaderboardData }
 			let images = []
 			if (report === "standard") {
 

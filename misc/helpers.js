@@ -445,6 +445,23 @@ const getPlayerInfo = async (playerID) => {
     return playerData;
 }
 
+
+const getScoresaberLeaderboardData = async (leaderboardId) => {
+    const response = await fetch(`https://scoresaber.com/api/leaderboard/by-id/${leaderboardId}/info`)
+    const data = await response.json()
+    return data
+}
+
+
+const extractPlayerIds = (playerList) => {
+    let playerIdList = []
+    for (const playerId of playerList.split(",")) {
+        playerIdList.push(+playerId)
+    }
+    return playerIdList
+}
+
+
 exports.getBeatSaverMapDataByHash = getBeatSaverMapDataByHash
 exports.getBeatSaverDifficulty = getBeatSaverDifficulty
 exports.getMapHashFromReplayData = getMapHashFromReplayData
@@ -457,3 +474,4 @@ exports.extractPlayerId = extractPlayerId
 exports.getPlayerInfo = getPlayerInfo
 exports.buildFullComboAccDataSet = buildFullComboAccDataSet
 exports.getReplayData = getReplayData
+exports.getScoresaberLeaderboardData = getScoresaberLeaderboardData

@@ -17,9 +17,9 @@ const transparentize = (value, opacity) => {
 
 exports.transparentize = transparentize
 
-const getChartTitle = (mapData) => {
+const getChartTitle = (mapData, scoresaberLeaderboardData) => {
     if (mapData.ranked) {
-        return `${mapData.songAuthorName} - ${mapData.mapName} | ${mapData.difficulty} | ⭐${mapData.stars} | 🔑${mapData.mapKey}`
+        return `${mapData.songAuthorName} - ${mapData.mapName} | ${mapData.difficulty} | ⭐${scoresaberLeaderboardData.stars} | 🔑${mapData.mapKey}`
     } else {
         return `${mapData.songAuthorName} - ${mapData.mapName} | ${mapData.difficulty} | 🔑${mapData.mapKey}`
     }
