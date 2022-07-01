@@ -1,13 +1,14 @@
 const kurkleColor = require('@kurkle/color')
+const movingAverages = require('moving-averages')
 const helpers = require('./helpers')
 
-exports.COLOR_RED = 'rgb(255, 99, 132)'
+exports.COLOR_RED    = 'rgb(255, 99, 132)'
 exports.COLOR_ORANGE = 'rgb(255, 159, 64)'
 exports.COLOR_YELLOW = 'rgb(255, 205, 86)'
-exports.COLOR_GREEN = 'rgb(75, 192, 192)'
-exports.COLOR_BLUE = 'rgb(54, 162, 235)'
+exports.COLOR_GREEN  = 'rgb(75, 192, 192)'
+exports.COLOR_BLUE   = 'rgb(54, 162, 235)'
 exports.COLOR_PURPLE = 'rgb(153, 102, 255)'
-exports.COLOR_GREY = 'rgb(201, 203, 207)'
+exports.COLOR_GREY   = 'rgb(201, 203, 207)'
 
 
 const transparentize = (value, opacity) => {
@@ -289,3 +290,25 @@ const getMultiLineRankColor = (rank) => {
 }
 
 exports.getMultiLineRankColor = getMultiLineRankColor
+
+
+exports.buildTimingChartData = (replayData) => {
+
+    const movingAverageFactor = helpers.getMovingAverageFactor(replayData)
+    let data = replayData.timingData.timingDeviations.map((element, index) => {
+        return element.difference
+    });
+
+    let averagedData = movingAverages.ma(data, movingAverageFactor)
+
+    let assocTimingData = replayData.noteTime.map((time, index) => {
+        return {
+            x: time,
+            y: averagedData[index]
+        }
+    })
+
+    return assocTimingData
+}
+
+

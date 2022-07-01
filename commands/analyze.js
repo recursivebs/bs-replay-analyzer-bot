@@ -4,7 +4,129 @@ const { MessageAttachment, Message } = require('discord.js');
 const fetch = require('node-fetch');
 const helpers = require('../misc/helpers')
 const chartUtils = require('../misc/chart-utils')
+const decode = require("../misc/decode.js")
 
+const buildTimingChart = async (params) => {
+
+	const width = 1280
+	const height = 900
+
+	const backgroundColour = '#2b2e33'
+
+	const canvas = new ChartJSNodeCanvas({
+		width, height, backgroundColour
+	})
+
+	const timingData = chartUtils.buildTimingChartData(params.replayData)
+	console.log(timingData)
+
+	const chartFont = "Rubik"
+
+	const chartTitle = chartUtils.getChartTitle(params.scoringData.mapData, params.scoresaberLeaderboardData)
+	const chartSubtitle = `${chartUtils.getChartSubtitle(params.scoringData, params.playerData)} | Avg Deviation: ${params.replayData.timingData.averageDeviationMS}ms`
+
+	let datasets = []
+    datasets.push({
+        type: 'scatter',
+        label: `timing`,
+        data: timingData,
+        borderColor: chartUtils.COLOR_RED,
+        backgroundColor: chartUtils.COLOR_RED,
+        radius: 4,
+    })
+
+	const data = {
+		datasets: datasets
+	}
+
+	const configuration = {
+		data: data,
+		options: {
+			layout: {
+				padding: 20
+			},
+			scales: {
+				x: {
+					grid: {
+						lineWidth: 1.6,
+						color: 'rgba(255,255,255,0.12)'
+					},
+					title: {
+						display: true,
+						text: 'Time (s)',
+						color: 'rgba(255,255,255,0.7)',
+						font: {
+							family: chartFont
+						}
+					},
+					type: 'linear',
+					position: 'bottom',
+					ticks: {
+						font: {
+							size: 18
+						},
+						color: 'rgba(255,255,255,0.7)'
+					}
+				},
+				y: {
+					grid: {
+						lineWidth: 1.6,
+						color: 'rgba(255,255,255,0.12)'
+					},
+					title: {
+						display: true,
+						text: 'Timing Deviation (ms)',
+						color: 'rgba(255,255,255,0.7)',
+						font: {
+							family: chartFont
+						}
+					},
+					ticks: {
+						font: {
+							size: 18
+						},
+						color: 'rgba(255,255,255,0.7)'
+					}
+				}
+			},
+			plugins: {
+				legend: {
+					labels: {
+						font: {
+							color: 'rgba(255,255,255,0.3)',
+							family: chartFont,
+							size: 16
+						},
+					},
+					position: 'top',
+				},
+				title: {
+					display: true,
+					text: chartTitle,
+					color: 'rgba(255,255,255,0.7)',
+					font: {
+						family: chartFont,
+						size: 32
+					}
+				},
+				subtitle: {
+					display: true,
+					text: chartSubtitle,
+					color: 'rgba(255,255,255,0.7)',
+					font: {
+						family: chartFont,
+						size: 24
+					}
+				}
+			}
+		}
+	}
+
+
+	const image = await canvas.renderToBuffer(configuration)
+	return image
+
+}
 
 
 const buildHitscoreChart = async (params) => {
@@ -378,6 +500,7 @@ module.exports = {
 				.addChoice('Split', "split")
 				.addChoice('Hitscore', "hitscore")
 				.addChoice('Hitscore Split', "hitscore-split")
+				.addChoice('Timing', "timing")
 		)
 		.addStringOption(option =>
 			option.setName("player_id")
@@ -450,6 +573,12 @@ module.exports = {
 				const rightParams = {...params, hand }
 				const rightImage = await buildHitscoreChart(rightParams)
 				images.push(rightImage)
+
+			} else if (report === "timing") {
+
+				console.log("Building timing chart...")
+				let image = await buildTimingChart(params)
+				images.push(image)
 
 			}
 

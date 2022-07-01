@@ -3,6 +3,151 @@ const helpers = require('../misc/helpers')
 const movingAverages = require('moving-averages')
 const chartUtils = require('../misc/chart-utils');
 const { data } = require('../commands/analyze');
+const JSZip = require("jszip");
+
+
+function getReplayURL(playerId, leaderboardId) {
+    return `https://ssdecode.azurewebsites.net/?playerID=${playerId}&songID=${leaderboardId}`
+}
+
+
+async function getMapTimings(leaderboardId) {
+    const mapData = await getMapData(leaderboardId)
+    const bpm = await getBPMFromLeaderboardId(leaderboardId)
+
+    // filter out all notes with a type that isnt 0 or 1
+    let timingData = mapData["_notes"].filter(note => note["_type"] <= 1)
+    timingData.forEach(x => {
+        x.timeSeconds = x._time * (60 / bpm);
+        x.noteInfo = `${x["_lineIndex"]}${x["_lineLayer"]}${x["_cutDirection"]}${x["_type"]}`
+    })
+    return timingData
+}
+
+
+async function getTimingData(replayData, playerId, leaderboardId) {
+
+    const timingDeviations = replayData.mapTimings.map((timingData, index) => {
+        let hitTime = 0;
+        try {
+            hitTime = replayData.noteTime[index]
+        } catch {}
+        return {
+            mapTime: timingData.timeSeconds,
+            hitTime: hitTime,
+            difference: timingData.timeSeconds - hitTime,
+            absDifference: Math.abs(timingData.timeSeconds - hitTime),
+            noteInfo: timingData.noteInfo
+        }
+    })
+
+    let minDeviation = 99999
+    let maxDeviation = 0
+
+    timingDeviations.forEach(x => {
+        if (x.absDifference < minDeviation) {
+            minDeviation = x.absDifference
+        }
+        if (x.absDifference > maxDeviation) {
+            maxDeviation = x.absDifference
+        }
+    })
+
+    const timingThreshold = 0.02
+    let average = timingDeviations.reduce((acc, curr) => acc + curr.difference, 0) / timingDeviations.length
+    let absAverage = timingDeviations.reduce((acc, curr) => acc + curr.absDifference, 0) / timingDeviations.length
+    let earlyHits = timingDeviations.filter(x => x.difference < -1 * timingThreshold).length
+    let lateHits = timingDeviations.filter(x => x.difference >= timingThreshold).length
+    let onTimeHits = timingDeviations.filter(x => x.difference < timingThreshold && x.difference >= -1 * timingThreshold).length
+
+    const timingData = {
+        minDeviationMS: +(minDeviation * 1000).toFixed(2),
+        maxDeviationMS: +(maxDeviation * 1000).toFixed(2),
+        averageDeviationMS: +(average * 1000).toFixed(2),
+        earlyHits: earlyHits,
+        lateHits: lateHits,
+        onTimeHits, onTimeHits,
+        timingThreshold: timingThreshold,
+        timingDeviations: timingDeviations,
+    }
+
+    return timingData
+
+}
+
+
+async function getBPMFromLeaderboardId(leaderboardId) {
+    const hash = await getMapHashFromLeaderboardId(leaderboardId)
+    const beatSaverMapData = await getBeatSaverMapDataByHash(hash)
+    return beatSaverMapData.metadata.bpm
+}
+
+
+async function getMapHashFromLeaderboardId(leaderboardId) {
+    const url = `https://scoresaber.com/api/leaderboard/by-id/${leaderboardId}/info`
+    const data = await fetch(url)
+    const json = await data.json()
+    return json.songHash
+}
+
+
+async function getDiffNameFromLeaderboardId(leaderboardId) {
+    const url = `https://scoresaber.com/api/leaderboard/by-id/${leaderboardId}/info`
+    const data = await fetch(url)
+    const json = await data.json()
+    console.log(leaderboardId)
+    console.log(json)
+    const diffStr = json.difficulty.difficultyRaw
+    const splitDiff = diffStr.split("_")[1]
+    return splitDiff
+}
+
+
+async function getBSORUrl(playerId, leaderboardId) {
+    const diffName = await getDiffNameFromLeaderboardId(leaderboardId)
+    const mapHash = await getMapHashFromLeaderboardId(leaderboardId)
+    return `https://cdn.beatleader.xyz/replays/${playerId}-${diffName}-Standard-${mapHash}.bsor`
+}
+
+
+async function getBeatLeaderReplayData(playerId, leaderboardId) {
+    const url = await getBSORUrl(playerId, leaderboardId)
+    const data = await fetch(url)
+    const arrayBuffer = await data.arrayBuffer()
+    const replayData = decode(arrayBuffer)
+    return replayData
+}
+
+
+async function getMapData(leaderboardId) {
+    const diffName = await getDiffNameFromLeaderboardId(leaderboardId)
+    const mapHash = await getMapHashFromLeaderboardId(leaderboardId)
+    const url = `https://r2cdn.beatsaver.com/${mapHash.toLowerCase()}.zip`
+    const zip = new JSZip()
+    const data = await fetch(url)
+    const zipDataBuffer = await data.arrayBuffer()
+    const zipData = await zip.loadAsync(zipDataBuffer)
+    //const file = zipData.files.filter(file => file.name.includes(diffName))[0]
+    for (file in zipData.files) {
+        if (zipData.files[file].name.includes(diffName)) {
+            const f = zipData.files[file]
+            const data = await f.async("string")
+            return JSON.parse(data)
+        }
+    }
+    return null
+}
+
+
+function beatLeaderTest() {
+    getBeatLeaderReplayData(zoro, "420790").then(data => {
+        const deviations = data.notes.map(note => note.noteCutInfo.timeDeviation)
+        const avg = deviations.reduce((a, b) => a + b, 0) / deviations.length
+        console.log(avg)
+    })
+}
+
+
 
 const getMovingAverageFactor = (replayData) => {
     if (replayData && replayData.scores) {
@@ -30,6 +175,7 @@ const getMovingAverageFactor = (replayData) => {
         return 10
     }
 }
+exports.getMovingAverageFactor = getMovingAverageFactor
 
 const getReplayData = async (params) => {
     let replayData = {}
@@ -46,6 +192,9 @@ const getReplayData = async (params) => {
         const replayResponse = await fetch(replayEndpoint)
         const replayDataStr = await replayResponse.json()
         replayData = JSON.parse(replayDataStr)
+        console.log(params.leaderboardId)
+        replayData.mapTimings = await getMapTimings(params.leaderboardId)
+        replayData.timingData = await getTimingData(replayData, params.playerId, params.leaderboardId)
     } catch (e) {
         console.error(e)
     } finally {
@@ -221,7 +370,10 @@ const extractHandData = (replayData) => {
 
 
 const getScoringDataFromReplayData = async (replayData) => {
-    const totalScore = replayData.info.totalScore;
+    let totalScore = 0;
+    if (replayData && replayData.info && replayData.info.totalScore) {
+        totalScore = replayData.info.totalScore;
+    }
     const mapHash = getMapHashFromReplayData(replayData)
     const mapData = await getBeatSaverMapDataByHash(mapHash)
     const beatSaverDifficulty = getBeatSaverDifficulty(replayData.info.difficulty)
